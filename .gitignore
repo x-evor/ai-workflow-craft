@@ -8,3 +8,4 @@ skills/workbuddy-marketplace/
 skills/workbuddy-plugins/
 skills/workbuddy-local/**/.venv/
 skills/workbuddy-local/**/data/browser_state/
+MCP/servers/workbuddy-*.json

@@ -21,7 +21,7 @@ The v1 sync layer pushes those sources to local client homes with Ansible in one
 | Area | Path | Current Shape | Index |
 | --- | --- | --- | --- |
 | Skills | `skills/` | Codex skills, local WorkBuddy skills, plus imported marketplace/plugin mirrors | [docs/catalog/skills.md](docs/catalog/skills.md) |
-| MCP Servers | `MCP/servers/` | OpenCode MCP configs plus extracted WorkBuddy MCP records | [docs/catalog/mcp-servers.md](docs/catalog/mcp-servers.md) |
+| MCP Servers | `MCP/servers/` | Curated MCP TOML records used by the local sync layer | [docs/catalog/mcp-servers.md](docs/catalog/mcp-servers.md) |
 | Ansible | `ansible/playbooks/` | Playbooks, inventory, vars, scripts, and grouped roles | [docs/catalog/ansible.md](docs/catalog/ansible.md) |
 | IaC | `iac/modules/` | Terraform, Pulumi, examples, scripts, VPN overlay, and supporting docs | [docs/catalog/iac-modules.md](docs/catalog/iac-modules.md) |
 | Documentation | `docs/` | Workflow notes plus repository inventory indexes | [docs/README.md](docs/README.md) |
@@ -66,4 +66,4 @@ Default sync behavior:
 | --- | --- |
 | Imported content | Some directories are synchronized from local tool workspaces and are not yet fully curated for public release. |
 | Marketplace mirrors | `skills/workbuddy-marketplace/` and `skills/workbuddy-plugins/` are treated as local mirrors and default to not being committed. |
-| MCP records | MCP files are normalized into one-record-per-server artifacts so they can be reviewed and curated later. Default sync only consumes curated `MCP/servers/*.toml` records. |
+| MCP records | MCP files are normalized into one-record-per-server artifacts so they can be reviewed and curated later. Default sync only consumes curated `MCP/servers/*.toml` records, and vendor-specific `workbuddy-*.json` records are excluded. |
