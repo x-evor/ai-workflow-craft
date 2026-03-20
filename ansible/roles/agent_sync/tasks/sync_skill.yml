@@ -1,0 +1,26 @@
+- name: Ensure parent directory exists for {{ agent_sync_skill_relpath }}
+  ansible.builtin.file:
+    path: "{{ (agent_sync_client_plan.skill_target_root ~ '/' ~ agent_sync_skill_relpath) | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Rsync {{ agent_sync_skill_relpath }} into {{ agent_sync_client }}
+  ansible.builtin.command:
+    argv: >-
+      {{
+        [
+          'rsync',
+          '-a',
+          '--delete',
+          '--itemize-changes'
+        ]
+        + (ansible_check_mode | ternary(['--dry-run'], []))
+        + (agent_sync_manifest.rsync_excludes | map('regex_replace', '^', '--exclude=') | list)
+        + [
+          agent_sync_repo_root ~ '/skills/' ~ agent_sync_skill_relpath ~ '/',
+          agent_sync_client_plan.skill_target_root ~ '/' ~ agent_sync_skill_relpath ~ '/'
+        ]
+      }}
+  register: agent_sync_skill_rsync
+  changed_when: (agent_sync_skill_rsync.stdout | default('')) | length > 0
+  check_mode: false

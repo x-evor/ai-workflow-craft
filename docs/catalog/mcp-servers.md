@@ -37,4 +37,5 @@
 | --- | --- |
 | File model | Each file is a single extracted server record to simplify comparison and later curation |
 | Sanitization | Absolute home paths were normalized to `${HOME}` where extraction logic touched them |
+| Default sync scope | The config-center sync layer only renders curated `MCP/servers/*.toml` records by default |
 | Review priority | Review WorkBuddy-derived records before publishing; some contain service URLs and env-var placeholders |

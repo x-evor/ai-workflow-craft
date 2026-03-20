@@ -4,9 +4,21 @@
 
 | Area | Path | Count | Notes |
 | --- | --- | ---: | --- |
-| Top-level playbook files | `ansible/playbooks/` | 75 | Mixed YAML playbooks, helper files, and shell entrypoints |
+| Top-level playbook files | `ansible/playbooks/` | 77 | Mixed YAML playbooks, helper files, and shell entrypoints |
 | Top-level playbook subdirs | `ansible/playbooks/` | 8 | `deepflow`, `docs`, `group_vars`, `inventory`, `roles`, `scripts`, `skills`, `vars` |
-| Role groups | `ansible/playbooks/roles/` | 5 | `charts`, `docker`, `github`, `grafana-dashboard`, `vhosts` |
+| Imported role groups | `ansible/playbooks/roles/` | 5 | `charts`, `docker`, `github`, `grafana-dashboard`, `vhosts` |
+| Local config-center roles | `ansible/roles/` | 1 | `agent_sync` for repo-to-client sync and scan |
+
+## Config-Center Entry Points
+
+| Playbook | Path | Purpose |
+| --- | --- | --- |
+| `sync_agent_clients.yml` | `ansible/playbooks/sync_agent_clients.yml` | Apply repo-managed `skills/` and curated `MCP/servers/*.toml` into supported local clients |
+| `scan_agent_clients.yml` | `ansible/playbooks/scan_agent_clients.yml` | Scan local clients for drift, extra local config, and inline secret warnings |
+
+| Role | Path | Purpose |
+| --- | --- | --- |
+| `agent_sync` | `ansible/roles/agent_sync/` | Normalize repo assets, render per-client config, apply copies, and produce scan reports |
 
 ## Top-Level Playbook Areas
 
@@ -48,4 +60,6 @@
 | Topic | Note |
 | --- | --- |
 | Structure | `ansible/playbooks/` is already a self-contained imported project, not just a small playbook folder |
+| Config center | `ansible/roles/agent_sync/` and the new sync/scan playbooks make this repo a local config center for Codex, Gemini, Claude, and Opencode |
+| Check mode | The sync workflow is designed to run with `ansible-playbook -C -D` against temporary target roots before applying to real home directories |
 | Public review | Review embedded templates and sample configs before publishing broadly |

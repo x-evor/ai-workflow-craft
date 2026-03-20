@@ -1,0 +1,48 @@
+- name: Resolve target root for {{ agent_sync_client }}
+  ansible.builtin.set_fact:
+    agent_sync_client_target_root: >-
+      {{
+        agent_sync_target_root_overrides[agent_sync_client]
+        | default(agent_sync_manifest.clients[agent_sync_client].target_root, true)
+      }}
+
+- name: Build sync plan for {{ agent_sync_client }}
+  ansible.builtin.command:
+    argv: >-
+      {{
+        [
+          agent_sync_python_executable,
+          agent_sync_repo_root ~ '/scripts/agent_sync/agent_sync.py',
+          'plan',
+          '--repo-root',
+          agent_sync_repo_root,
+          '--client',
+          agent_sync_client,
+          '--scopes',
+          agent_sync_scopes | join(','),
+          '--target-root',
+          agent_sync_client_target_root
+        ]
+        + (agent_sync_include_mirrors | bool | ternary(['--include-mirrors'], []))
+        + [
+          '--exclude-skill-roots-json',
+          agent_sync_excluded_skill_roots | to_json,
+          '--exclude-dir-names-json',
+          agent_sync_manifest.exclude_dir_names | to_json
+        ]
+      }}
+  register: agent_sync_client_plan_command
+  changed_when: false
+  check_mode: false
+
+- name: Store sync plan for {{ agent_sync_client }}
+  ansible.builtin.set_fact:
+    agent_sync_client_plan: "{{ agent_sync_client_plan_command.stdout | from_json }}"
+
+- name: Sync client {{ agent_sync_client }}
+  ansible.builtin.include_tasks: sync_client.yml
+  when: agent_sync_mode == "sync"
+
+- name: Scan client {{ agent_sync_client }}
+  ansible.builtin.include_tasks: scan_client.yml
+  when: agent_sync_mode == "scan"

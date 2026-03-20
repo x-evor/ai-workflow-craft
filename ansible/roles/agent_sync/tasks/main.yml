@@ -1,0 +1,36 @@
+- name: Load agent sync manifest
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir | dirname }}/vars/agent_sync_manifest.yml"
+
+- name: Validate agent sync mode
+  ansible.builtin.assert:
+    that:
+      - agent_sync_mode in ["sync", "scan"]
+      - agent_sync_clients | length > 0
+      - agent_sync_scopes | length > 0
+    fail_msg: "agent_sync_mode must be sync or scan, with non-empty clients and scopes."
+
+- name: Normalize sync inputs
+  ansible.builtin.set_fact:
+    agent_sync_excluded_skill_roots: "{{ [] if agent_sync_include_mirrors | bool else agent_sync_manifest.exclude_skill_roots_default }}"
+    agent_sync_scan_reports: []
+
+- name: Process requested clients
+  ansible.builtin.include_tasks: client.yml
+  loop: "{{ agent_sync_clients }}"
+  loop_control:
+    loop_var: agent_sync_client
+
+- name: Show scan summary
+  ansible.builtin.debug:
+    msg: "{{ agent_sync_scan_reports | to_nice_json }}"
+  when: agent_sync_mode == "scan"
+
+- name: Write scan report to disk
+  ansible.builtin.copy:
+    content: "{{ agent_sync_scan_reports | to_nice_json }}\n"
+    dest: "{{ agent_sync_report_path }}"
+    mode: "0644"
+  when:
+    - agent_sync_mode == "scan"
+    - agent_sync_report_path | length > 0

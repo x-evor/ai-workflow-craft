@@ -1,0 +1,86 @@
+- name: Skip unsupported client {{ agent_sync_client }}
+  ansible.builtin.debug:
+    msg: "{{ agent_sync_client_plan.report.notes | default(['sync not supported']) | join(' ') }}"
+  when: not agent_sync_client_plan.supports_apply | bool
+
+- name: Ensure managed root exists for {{ agent_sync_client }}
+  ansible.builtin.file:
+    path: "{{ agent_sync_client_plan.target_root }}"
+    state: directory
+    mode: "0755"
+  when: agent_sync_client_plan.supports_apply | bool
+
+- name: Ensure skills root exists for {{ agent_sync_client }}
+  ansible.builtin.file:
+    path: "{{ agent_sync_client_plan.skill_target_root }}"
+    state: directory
+    mode: "0755"
+  when:
+    - agent_sync_client_plan.supports_apply | bool
+    - "'skills' in agent_sync_scopes"
+
+- name: Ensure Codex system marker parent exists
+  ansible.builtin.file:
+    path: "{{ (agent_sync_client_target_root ~ '/' ~ agent_sync_manifest.clients.codex.system_marker_relpath) | dirname }}"
+    state: directory
+    mode: "0755"
+  when:
+    - agent_sync_client == "codex"
+    - agent_sync_client_plan.supports_apply | bool
+    - "'skills' in agent_sync_scopes"
+    - agent_sync_client_plan.skill_relpaths | select('match', '^\\.system/') | list | length > 0
+
+- name: Create Codex system marker
+  ansible.builtin.copy:
+    content: "managed-by-ai-workflow-craft\n"
+    dest: "{{ agent_sync_client_target_root }}/{{ agent_sync_manifest.clients.codex.system_marker_relpath }}"
+    force: false
+    mode: "0644"
+  when:
+    - agent_sync_client == "codex"
+    - agent_sync_client_plan.supports_apply | bool
+    - "'skills' in agent_sync_scopes"
+    - agent_sync_client_plan.skill_relpaths | select('match', '^\\.system/') | list | length > 0
+
+- name: Remove stale managed skills for {{ agent_sync_client }}
+  ansible.builtin.file:
+    path: "{{ agent_sync_client_plan.skill_target_root }}/{{ item }}"
+    state: absent
+  loop: "{{ agent_sync_client_plan.remove_skill_relpaths }}"
+  when:
+    - agent_sync_client_plan.supports_apply | bool
+    - "'skills' in agent_sync_scopes"
+
+- name: Sync managed skill directories for {{ agent_sync_client }}
+  ansible.builtin.include_tasks: sync_skill.yml
+  loop: "{{ agent_sync_client_plan.skill_relpaths }}"
+  loop_control:
+    loop_var: agent_sync_skill_relpath
+  when:
+    - agent_sync_client_plan.supports_apply | bool
+    - "'skills' in agent_sync_scopes"
+
+- name: Ensure config parent directory exists for {{ agent_sync_client }}
+  ansible.builtin.file:
+    path: "{{ agent_sync_client_plan.config_target_path | dirname }}"
+    state: directory
+    mode: "0755"
+  when:
+    - agent_sync_client_plan.supports_apply | bool
+    - agent_sync_client_plan.should_write_config | bool
+
+- name: Write managed config for {{ agent_sync_client }}
+  ansible.builtin.copy:
+    content: "{{ agent_sync_client_plan.rendered_config_content }}"
+    dest: "{{ agent_sync_client_plan.config_target_path }}"
+    mode: "0644"
+  when:
+    - agent_sync_client_plan.supports_apply | bool
+    - agent_sync_client_plan.should_write_config | bool
+
+- name: Write managed state file for {{ agent_sync_client }}
+  ansible.builtin.copy:
+    content: "{{ agent_sync_client_plan.rendered_state_content }}"
+    dest: "{{ agent_sync_client_plan.state_target_path }}"
+    mode: "0600"
+  when: agent_sync_client_plan.supports_apply | bool

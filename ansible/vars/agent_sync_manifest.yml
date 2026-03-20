@@ -1,0 +1,26 @@
+agent_sync_manifest:
+  exclude_skill_roots_default:
+    - workbuddy-marketplace
+    - workbuddy-plugins
+  exclude_dir_names:
+    - .venv
+    - __pycache__
+    - browser_state
+  rsync_excludes:
+    - .venv/
+    - __pycache__/
+    - data/browser_state/
+    - .DS_Store
+  clients:
+    codex:
+      target_root: "{{ lookup('env', 'HOME') }}/.codex"
+      system_marker_relpath: "skills/.system/.codex-system-skills.marker"
+    gemini:
+      target_root: "{{ lookup('env', 'HOME') }}/.gemini/antigravity"
+    claude:
+      target_root: "{{ lookup('env', 'HOME') }}/.claude"
+    opencode:
+      target_root: "{{ lookup('env', 'HOME') }}/.opencode"
+    ollama:
+      target_root: "{{ lookup('env', 'HOME') }}/.ollama/agent-craft"
+      v1_stub: true

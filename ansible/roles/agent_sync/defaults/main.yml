@@ -1,0 +1,14 @@
+agent_sync_mode: sync
+agent_sync_repo_root: "{{ playbook_dir | dirname | dirname }}"
+agent_sync_clients:
+  - codex
+  - gemini
+  - claude
+  - opencode
+agent_sync_scopes:
+  - skills
+  - mcp
+agent_sync_include_mirrors: false
+agent_sync_target_root_overrides: {}
+agent_sync_report_path: ""
+agent_sync_python_executable: python3

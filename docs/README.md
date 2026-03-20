@@ -11,6 +11,12 @@ This folder tracks repository structure, workflow notes, and curation entry poin
 | Ansible | [catalog/ansible.md](catalog/ansible.md) | Playbook inventory, role groups, and supporting folders |
 | IaC | [catalog/iac-modules.md](catalog/iac-modules.md) | Module layout across Terraform, Pulumi, examples, and scripts |
 
+## Config Center
+
+| Document | Scope |
+| --- | --- |
+| [../ansible/docs/agent-sync.md](../ansible/docs/agent-sync.md) | Repo-to-client sync and scan workflow for `skills/` and `MCP/servers/` |
+
 ## Workflow Docs
 
 | Path | Status |

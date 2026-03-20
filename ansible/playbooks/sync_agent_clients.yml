@@ -1,0 +1,9 @@
+---
+- name: Sync agent clients from ai-workflow-craft
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+    - role: agent_sync
+      vars:
+        agent_sync_mode: sync

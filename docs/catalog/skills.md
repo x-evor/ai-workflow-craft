@@ -65,4 +65,5 @@
 | --- | --- |
 | Public sharing | Curate from `skills/` and `skills/workbuddy-local/` first |
 | Marketplace mirrors | Treat `workbuddy-marketplace` and `workbuddy-plugins` as local source archives and keep them out of normal commits |
+| Default sync scope | The config-center sync layer excludes mirror/cache roots unless `agent_sync_include_mirrors=true` is set |
 | Future cleanup | Add a later `skills/curated/` layer when active skills are finalized |

@@ -1,0 +1,3 @@
+- name: Append scan report for {{ agent_sync_client }}
+  ansible.builtin.set_fact:
+    agent_sync_scan_reports: "{{ agent_sync_scan_reports + [agent_sync_client_plan.report] }}"
