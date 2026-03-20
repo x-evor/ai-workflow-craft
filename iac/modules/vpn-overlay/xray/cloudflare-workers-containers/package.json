@@ -1,0 +1,17 @@
+{
+    "name": "hk-xhttp-svc-plus",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Xray XHTTP server on Cloudflare Workers Containers",
+    "scripts": {
+        "deploy": "wrangler deploy",
+        "dev": "wrangler dev",
+        "tail": "wrangler tail",
+        "secret:uuid": "wrangler secret put XRAY_UUID"
+    },
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20250620.0",
+        "typescript": "^5.7.0",
+        "wrangler": "^4.0.0"
+    }
+}

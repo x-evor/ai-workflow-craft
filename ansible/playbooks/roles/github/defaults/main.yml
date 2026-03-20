@@ -1,0 +1,4 @@
+---
+github_org_name: "cloud-neutral"
+owner: "{{ github_org_name }}"
+repo: ""

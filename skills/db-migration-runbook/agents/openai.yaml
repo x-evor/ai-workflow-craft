@@ -1,0 +1,4 @@
+interface:
+  display_name: "DB Migration Runbook"
+  short_description: "PostgreSQL migration runbook guide"
+  default_prompt: "Use -migration-runbook to draft a concise PostgreSQL migration runbook."

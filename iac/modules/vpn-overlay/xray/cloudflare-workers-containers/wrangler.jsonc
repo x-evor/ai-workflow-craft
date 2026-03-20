@@ -1,0 +1,46 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    // Worker name — matches Cloudflare dashboard naming
+    "name": "hk-xhttp-svc-plus",
+    "main": "src/index.ts",
+    "compatibility_date": "2025-06-02",
+    // Container definition: xray-core with XHTTP transport
+    "containers": [
+        {
+            "class_name": "XrayContainer",
+            "image": "./Dockerfile",
+            "max_instances": 5
+        }
+    ],
+    // Durable Object binding for the container
+    "durable_objects": {
+        "bindings": [
+            {
+                "name": "XRAY_CONTAINER",
+                "class_name": "XrayContainer"
+            }
+        ]
+    },
+    // Required: SQLite-backed DO class for containers
+    "migrations": [
+        {
+            "tag": "v1",
+            "new_sqlite_classes": [
+                "XrayContainer"
+            ]
+        }
+    ],
+    // Environment variables (non-secret)
+    "vars": {
+        "XRAY_PATH": "/xhttp",
+        "XRAY_LOG_LEVEL": "warning"
+    },
+    // Observability
+    "observability": {
+        "enabled": true
+    }
+    // Uncomment for custom domain routing:
+    // "routes": [
+    //   { "pattern": "xhttp.svc.plus/*", "zone_name": "svc.plus" }
+    // ]
+}

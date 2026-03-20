@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architect Orchestrator"
+  short_description: "Split, route, and review code work"
+  default_prompt: "Use $architect-orchestrator to turn this request into ranked architecture options, multi-agent work slices, acceptance evidence, and optional external agent lanes."

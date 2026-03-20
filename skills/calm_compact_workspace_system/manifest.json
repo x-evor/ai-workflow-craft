@@ -1,0 +1,17 @@
+{
+  "skill": "calm_compact_workspace_system",
+  "version": "1.2",
+  "entrypoint": "SKILL.md",
+  "includes": [
+    "creative_north_star",
+    "color_system",
+    "depth_and_separation",
+    "typography",
+    "logo_system",
+    "components",
+    "interaction",
+    "ai_control",
+    "ui_kits"
+  ],
+  "description": "A cross-platform design system for calm, compact workspaces that blends system-native utility UI with editorial precision, tonal layering, and cloud-neutral glass depth."
+}

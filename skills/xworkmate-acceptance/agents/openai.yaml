@@ -1,0 +1,4 @@
+interface:
+  display_name: "XWorkmate Acceptance"
+  short_description: "Validate XWorkmate release readiness"
+  default_prompt: "Run the XWorkmate acceptance workflow for this repo and report pass/fail plus manual follow-ups."

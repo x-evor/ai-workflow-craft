@@ -1,0 +1,10 @@
+# Sanitized from ~/.opencode/config.toml
+# mcp server: ssh-manager
+
+type = "stdio"
+command = "node"
+args = ["${HOME}/workspaces/cloud-neutral-toolkit/mcp-ssh-manager/src/index.js"]
+startup_timeout_sec = 20
+
+[env]
+SSH_CONFIG_PATH = "${HOME}/.opencode/ssh-config.toml"

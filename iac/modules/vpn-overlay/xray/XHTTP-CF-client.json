@@ -1,0 +1,34 @@
+"outbounds": [
+    {
+        "protocol": "vless",
+        "settings": {
+            "vnext": [
+                {
+                    "address": "<WORKER_DOMAIN>",
+                    "port": 443,
+                    "users": [
+                        {
+                            "id": "<UUID>",
+                            "encryption": "none"
+                        }
+                    ]
+                }
+            ]
+        },
+        "streamSettings": {
+            "network": "xhttp",
+            "security": "tls",
+            "tlsSettings": {
+                "serverName": "<WORKER_DOMAIN>",
+                "allowInsecure": false,
+                "fingerprint": "chrome"
+            },
+            "xhttpSettings": {
+                "path": "/xhttp",
+                "host": "<WORKER_DOMAIN>",
+                "mode": "auto"
+            }
+        },
+        "tag": "proxy"
+    }
+]

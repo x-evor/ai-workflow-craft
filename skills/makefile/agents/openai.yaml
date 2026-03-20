@@ -1,0 +1,4 @@
+interface:
+  display_name: "Makefile Engineer"
+  short_description: "Build, debug, and standardize project Makefiles for CI."
+  default_prompt: "Create or improve this repository Makefile with clear targets, deterministic behavior, and safe dependency handling."

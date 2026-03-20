@@ -1,0 +1,74 @@
+name: Deploy Xray XHTTP to Cloudflare Workers Containers
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'vpn-overlay/xray/cloudflare-workers-containers/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: false
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: vpn-overlay/xray/cloudflare-workers-containers
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: vpn-overlay/xray/cloudflare-workers-containers
+          command: deploy
+          secrets: |
+            XRAY_UUID
+        env:
+          XRAY_UUID: ${{ secrets.XRAY_UUID }}
+
+      - name: Verify deployment
+        if: success()
+        run: |
+          echo "✅ Deployment successful"
+          echo "Worker URL: https://hk-xhttp-svc-plus.${CLOUDFLARE_ACCOUNT_SUBDOMAIN}.workers.dev"
+          echo ""
+          echo "Waiting 30s for container to start..."
+          sleep 30
+          
+          # Health check
+          HEALTH_URL="https://hk-xhttp-svc-plus.${CLOUDFLARE_ACCOUNT_SUBDOMAIN:-workers}.workers.dev/healthz"
+          echo "Health check: $HEALTH_URL"
+          curl -sf "$HEALTH_URL" || echo "⚠️ Health check failed (container may still be starting)"

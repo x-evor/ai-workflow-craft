@@ -1,0 +1,192 @@
+name: Vultr Landing Zone Baseline
+
+on:
+  push:
+    paths:
+      - 'config/vultr/**'
+      - 'iac_modules/pulumi/vultr/**'
+      - '.github/workflows/iac-pipeline-vultr-landingzone-baseline.yaml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_action:
+        description: "Deployment action to execute"
+        type: choice
+        options:
+          - init
+          - create
+          - migrate
+          - upgrade
+          - backup
+          - restore
+          - destroy
+        default: upgrade
+      deploy_dry_run:
+        description: "Run deployment steps in dry-run mode"
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+        default: 'true'
+      config_path:
+        description: "Configuration directory path"
+        required: false
+        type: string
+        default: config/vultr
+  workflow_call:
+    inputs:
+      deploy_action:
+        required: false
+        type: string
+        default: upgrade
+      deploy_dry_run:
+        required: false
+        type: string
+        default: 'true'
+      config_path:
+        required: false
+        type: string
+        default: config/vultr
+    secrets:
+      VULTR_API_KEY:
+        required: true
+      PULUMI_ACCESS_TOKEN:
+        required: true
+
+jobs:
+  init:
+    name: Initialize Vultr Pulumi stacks
+    runs-on: ubuntu-latest
+    env:
+      PULUMI_CI: 'true'
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_action == 'init') ||
+        (github.event_name == 'workflow_call' && inputs.deploy_action == 'init')
+      }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pulumi/setup-pulumi@v4
+        with:
+          pulumi-version: '^3'
+      - name: Ensure Pulumi stacks exist
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        run: |
+          pulumi login
+          for stack in vultr/baseline-dev vultr/baseline-prod; do
+            pulumi stack select "$stack" --non-interactive || pulumi stack init "$stack" --non-interactive
+          done
+
+  preview:
+    name: Preview baseline changes
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_action != 'init') ||
+        (github.event_name == 'workflow_call' && inputs.deploy_action != 'init') ||
+        (github.event_name != 'workflow_dispatch' && github.event_name != 'workflow_call')
+      }}
+    runs-on: ubuntu-latest
+    env:
+      PULUMI_CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: pulumi/setup-pulumi@v4
+        with:
+          pulumi-version: '^3'
+      - name: Ensure Pulumi stack exists
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        run: |
+          pulumi login
+          pulumi stack select vultr/baseline-dev --non-interactive || pulumi stack init vultr/baseline-dev --non-interactive
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Pulumi preview
+        uses: pulumi/actions@v4
+        with:
+          command: preview
+          stack-name: vultr/baseline-dev
+          work-dir: iac_modules/pulumi/vultr
+        env:
+          VULTR_API_KEY: ${{ secrets.VULTR_API_KEY }}
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+  apply:
+    name: Apply to production stack
+    needs: preview
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_action != 'init') ||
+        (github.event_name == 'workflow_call' && inputs.deploy_action != 'init') ||
+        (github.event_name != 'workflow_dispatch' && github.event_name != 'workflow_call')
+      }}
+    runs-on: ubuntu-latest
+    env:
+      PULUMI_CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: pulumi/setup-pulumi@v4
+        with:
+          pulumi-version: '^3'
+      - name: Ensure Pulumi stack exists
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        run: |
+          pulumi login
+          pulumi stack select vultr/baseline-prod --non-interactive || pulumi stack init vultr/baseline-prod --non-interactive
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Pulumi up
+        uses: pulumi/actions@v4
+        with:
+          command: up
+          stack-name: vultr/baseline-prod
+          work-dir: iac_modules/pulumi/vultr
+        env:
+          VULTR_API_KEY: ${{ secrets.VULTR_API_KEY }}
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+  validation:
+    name: Validate Vultr baseline readiness
+    needs: apply
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_action != 'init') ||
+        (github.event_name == 'workflow_call' && inputs.deploy_action != 'init') ||
+        (github.event_name != 'workflow_dispatch' && github.event_name != 'workflow_call')
+      }}
+    runs-on: ubuntu-latest
+    env:
+      PULUMI_CI: 'true'
+      CONFIG_PATH: ${{ inputs.config_path || github.event.inputs.config_path || 'config/vultr' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run baseline validation checks
+        run: scripts/validation/validate-baseline.sh "Vultr" "${{ env.CONFIG_PATH }}" "iac_modules/pulumi"
+
+  delivery:
+    name: Deliver Vultr baseline rollout notifications
+    needs: validation
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_action != 'init') ||
+        (github.event_name == 'workflow_call' && inputs.deploy_action != 'init') ||
+        (github.event_name != 'workflow_dispatch' && github.event_name != 'workflow_call')
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Notify stakeholders
+        run: scripts/notifications/notify-baseline-delivery.sh

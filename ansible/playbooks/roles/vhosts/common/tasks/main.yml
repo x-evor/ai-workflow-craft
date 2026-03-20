@@ -1,0 +1,57 @@
+---
+# ===== Base system (always) =====
+- name: Base | set timezone
+  ansible.builtin.command: "timedatectl set-timezone Asia/Shanghai"
+  changed_when: false
+  become: true
+
+- name: Base | render /etc/hostname
+  ansible.builtin.template:
+    src: templates/hostname.j2
+    dest: /etc/hostname
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+- name: Base | set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  become: true
+
+- name: Base | update /etc/hosts
+  ansible.builtin.template:
+    src: templates/hosts
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+- name: Base | harden ssh
+  ansible.builtin.script: files/secure_ssh.sh
+  become: true
+
+# ===== Common baseline (OS split) =====
+- name: Common | Debian family baseline
+  ansible.builtin.import_tasks: common_debian.yml
+  when:
+    - enable_common | bool
+    - ansible_facts.os_family == "Debian"
+
+- name: Common | RedHat family baseline
+  ansible.builtin.import_tasks: common_redhat.yml
+  when:
+    - enable_common | bool
+    - ansible_facts.os_family == "RedHat"
+
+# ===== Add-ons (default OFF) =====
+- name: Addon | S3FS mount
+  ansible.builtin.import_tasks: addons/s3fs.yml
+  when: s3fs_enable | default(false) | bool
+  tags: [s3fs, mount]
+
+- name: Addon | GPU configuration
+  ansible.builtin.import_tasks: addons/gpu.yml
+  when: gpu_enable | default(false) | bool
+  tags: [gpu, nvidia]

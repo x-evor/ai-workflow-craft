@@ -1,0 +1,14 @@
+terraform {
+  required_version = ">= {{ TF_VERSION }}"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> {{ AWS_provider_version }}"
+    }
+  }
+}
+
+provider "aws" {
+  region = local.region
+}

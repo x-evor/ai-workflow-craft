@@ -1,0 +1,7 @@
+# Sanitized from ~/.opencode/config.toml
+# mcp server: next-devtools
+
+type = "stdio"
+command = "npx"
+args = ["-y", "next-devtools-mcp@latest"]
+startup_timeout_sec = 30

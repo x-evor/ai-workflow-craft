@@ -1,0 +1,57 @@
+*.pyc
+venv/
+.DS_Store
+infrastructure/.DS_Store
+./playbook/.DS_Storevenv/
+
+# Python virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Pulumi
+*.bak
+.pulumi/
+.pulumi-history/
+
+# VSCode
+.vscode/
+
+# macOS metadata
+.DS_Store
+
+# Logs and local debug
+*.log
+
+# Coverage
+htmlcov/
+coverage.xml
+*.cover
+.cache/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+# Generated Terraform provider/backend files for AWS cloud envs
+terraform-hcl-standard/aws-cloud/envs/*/provider.tf
+terraform-hcl-standard/aws-cloud/envs/*/backend.tf
+# Generated provider/backend files for component stacks
+terraform-hcl-standard/aws-cloud/component/*/provider.tf
+terraform-hcl-standard/aws-cloud/component/*/backend.tf
+
+# Ansible
+*.retry
+hosts/inventory
+
+# Installer artifacts
+offline-iac/
+offline-setup-*.tar.gz
+
+.env

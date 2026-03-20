@@ -1,0 +1,188 @@
+name: AWS Global Landing Zone Baseline
+
+on:
+  push:
+    paths:
+      - 'config/aws-global/**'
+      - 'iac_modules/pulumi/**'
+      - '.github/workflows/iac-pipeline-aws-global-landingzone-baseline.yaml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_action:
+        description: "Deployment action to execute"
+        type: choice
+        options:
+          - init
+          - create
+          - migrate
+          - upgrade
+          - backup
+          - restore
+          - destroy
+        default: upgrade
+      deploy_dry_run:
+        description: "Run deployment steps in dry-run mode"
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+        default: 'true'
+      config_path:
+        description: "Configuration directory path"
+        required: false
+        type: string
+        default: config/aws-global
+  workflow_call:
+    inputs:
+      deploy_action:
+        required: false
+        type: string
+        default: upgrade
+      deploy_dry_run:
+        required: false
+        type: string
+        default: 'true'
+      config_path:
+        required: false
+        type: string
+        default: config/aws-global
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_SESSION_TOKEN:
+        required: false
+      AWS_REGION:
+        required: true
+      PULUMI_ACCESS_TOKEN:
+        required: true
+
+env:
+  PULUMI_CI: 'true'
+  CONFIG_PATH: ${{ inputs.config_path || github.event.inputs.config_path || 'config/aws-global' }}
+  DEPLOY_ACTION: ${{ inputs.deploy_action || github.event.inputs.deploy_action || 'upgrade' }}
+  DEPLOY_DRY_RUN: ${{ inputs.deploy_dry_run || github.event.inputs.deploy_dry_run || 'true' }}
+
+jobs:
+  preview:
+    name: Preview AWS baseline changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pulumi
+        uses: pulumi/actions@v4
+        with:
+          pulumi-version: 3.3.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          role-session-name: pulumi-preview
+
+      - name: Ensure Pulumi stack exists
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        run: |
+          pulumi login
+          pulumi stack select aws/global-baseline-dev --non-interactive || \
+          pulumi stack init aws/global-baseline-dev --non-interactive
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        working-directory: iac_modules/pulumi/
+
+      - name: Pulumi preview
+        uses: pulumi/actions@v6
+        with:
+          command: preview
+          stack-name: aws/global-baseline-dev
+          work-dir: iac_modules/pulumi
+          comment-on-pr: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+  apply:
+    name: Apply AWS baseline to production
+    needs: preview
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_call'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pulumi
+        uses: pulumi/actions@v6
+        with:
+          pulumi-version: 3.3.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          role-session-name: pulumi-apply
+
+      - name: Ensure Pulumi stack exists
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        run: |
+          pulumi login
+          pulumi stack select aws/global-baseline-prod --non-interactive || \
+          pulumi stack init aws/global-baseline-prod --non-interactive
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        working-directory: iac_modules/pulumi/
+
+      - name: Pulumi up
+        uses: pulumi/actions@v6
+        with:
+          command: up
+          stack-name: aws/global-baseline-prod
+          work-dir: iac_modules/pulumi
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+  validation:
+    name: Validate AWS baseline readiness
+    needs: apply
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run baseline validation checks
+        run: scripts/validation/validate-baseline.sh "AWS" "${{ env.CONFIG_PATH }}" "iac_modules/pulumi"
+
+  delivery:
+    name: Deliver AWS baseline rollout notifications
+    needs: validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Notify stakeholders
+        run: scripts/notifications/notify-baseline-delivery.sh

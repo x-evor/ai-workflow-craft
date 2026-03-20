@@ -4,3 +4,7 @@
 .DS_Store
 __pycache__/
 *.pyc
+skills/workbuddy-marketplace/
+skills/workbuddy-plugins/
+skills/workbuddy-local/**/.venv/
+skills/workbuddy-local/**/data/browser_state/

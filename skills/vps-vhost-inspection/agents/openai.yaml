@@ -1,0 +1,4 @@
+interface:
+  display_name: "VPS Vhost Inspection"
+  short_description: "SSH inspect VPS/Vhost health and cleanup safety"
+  default_prompt: "Use $vps-vhost-inspection to inspect VPS or Vhost state over SSH and produce a read-only report with safe cleanup guidance."
