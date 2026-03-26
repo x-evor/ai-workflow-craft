@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDF"
+  short_description: "Read, OCR, merge, split, and fill PDF documents."
+  default_prompt: "Use the PDF skill to inspect, OCR, merge, split, annotate, or fill PDF files."

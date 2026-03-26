@@ -5,7 +5,7 @@
 | Source | Path | Count | Notes |
 | --- | --- | ---: | --- |
 | Codex system skills | `skills/.system/` | 3 | Built-in system-oriented skills mirrored from local Codex home |
-| Codex custom skills | `skills/` top level | 13 | Direct skills such as `figma`, `playwright`, `makefile`, `vercel-deploy` |
+| Codex custom skills | `skills/` top level | 20 | Direct skills such as `figma`, `playwright`, `pdf`, `docx`, `pptx`, and `xlsx` |
 | WorkBuddy local skills | `skills/workbuddy-local/` | 13 | Closest match to actively linked local WorkBuddy skills |
 | WorkBuddy marketplace mirror | `skills/workbuddy-marketplace/` | 45 | Local mirror only, default excluded from commits |
 | WorkBuddy plugin mirror | `skills/workbuddy-plugins/` | 508 imported `SKILL.md` directories | Local mirror only, default excluded from commits |
@@ -27,16 +27,20 @@
 | architect-orchestrator | `skills/architect-orchestrator/` |
 | calm_compact_workspace_system | `skills/calm_compact_workspace_system/` |
 | db-migration-runbook | `skills/db-migration-runbook/` |
+| docx | `skills/docx/` |
 | figma | `skills/figma/` |
 | gh-fix-ci | `skills/gh-fix-ci/` |
 | git-history-secret-remediation | `skills/git-history-secret-remediation/` |
 | github-action-conventions | `skills/github-action-conventions/` |
 | makefile | `skills/makefile/` |
 | openai-docs | `skills/openai-docs/` |
+| pdf | `skills/pdf/` |
 | playwright | `skills/playwright/` |
+| pptx | `skills/pptx/` |
 | security-best-practices | `skills/security-best-practices/` |
 | vercel-deploy | `skills/vercel-deploy/` |
 | vps-vhost-inspection | `skills/vps-vhost-inspection/` |
+| xlsx | `skills/xlsx/` |
 | xstream-functional-test-baseline | `skills/xstream-functional-test-baseline/` |
 | xworkmate-acceptance | `skills/xworkmate-acceptance/` |
 | xworkmate-secure-development | `skills/xworkmate-secure-development/` |

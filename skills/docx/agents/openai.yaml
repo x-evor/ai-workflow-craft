@@ -1,0 +1,4 @@
+interface:
+  display_name: "Word / DOCX"
+  short_description: "Create, edit, and review Word documents."
+  default_prompt: "Use the DOCX skill to draft, revise, reformat, or extract content from Word documents."

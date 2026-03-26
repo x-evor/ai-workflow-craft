@@ -23,6 +23,8 @@ The sync layer is intentionally one-way: `repo -> clients`.
 | --- | --- |
 | `ansible/playbooks/sync_agent_clients.yml` | Apply managed skills and MCP records into local clients |
 | `ansible/playbooks/scan_agent_clients.yml` | Compare local client state with repo state and output drift/import findings |
+| `python3 scripts/agent_sync/async_sync.py start` | Launch a background sync job for UI-triggered refresh actions |
+| `python3 scripts/agent_sync/async_sync.py status` | Poll background sync status, log path, and exit code |
 
 ## Default Behavior
 
@@ -62,6 +64,18 @@ ANSIBLE_CONFIG=ansible/playbooks/ansible.cfg ansible-playbook -i localhost, -c l
   -e '{"agent_sync_clients":["codex","claude"],"agent_sync_scopes":["skills"]}'
 ```
 
+Start a background sync job suitable for a UI "Refresh / Sync" button:
+
+```bash
+python3 scripts/agent_sync/async_sync.py start --clients codex,claude --scopes skills
+```
+
+Poll the current background status:
+
+```bash
+python3 scripts/agent_sync/async_sync.py status
+```
+
 Scan local clients and write a report:
 
 ```bash
@@ -78,3 +92,9 @@ The sync layer is split into three pieces:
 - apply/scan: `ansible/roles/agent_sync/`
 
 The helper rewrites managed config files after merging preserved local config with repo-managed MCP entries. Comments and original formatting are not preserved.
+
+The async wrapper is intentionally thin: it does not change sync semantics, it only detaches execution, records a status JSON file, and writes a rolling log file under `~/.cache/ai-workflow-craft/agent-sync/`. A UI can safely wire this into:
+
+- a manual "Refresh / Sync" button that calls `start`
+- a polling loop that calls `status`
+- a disabled-state guard while `running=true`

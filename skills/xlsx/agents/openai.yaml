@@ -1,0 +1,4 @@
+interface:
+  display_name: "Excel / XLSX"
+  short_description: "Work with spreadsheets, formulas, charts, and CSV/TSV."
+  default_prompt: "Use the spreadsheet skill to open, analyze, fix, or generate Excel, XLSX, CSV, or TSV files."

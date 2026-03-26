@@ -1,0 +1,4 @@
+interface:
+  display_name: "PowerPoint / PPTX"
+  short_description: "Create, edit, and analyze presentations and slide decks."
+  default_prompt: "Use the PPTX skill to create, edit, analyze, or restyle PowerPoint presentations and slide decks."
