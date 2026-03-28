@@ -1,4 +1,4 @@
 interface:
   display_name: "Architect Orchestrator"
   short_description: "Split, route, and review code work"
-  default_prompt: "Use $architect-orchestrator to turn this request into ranked architecture options, multi-agent work slices, acceptance evidence, and optional external agent lanes."
+  default_prompt: "Use $architect-orchestrator to turn this request into ranked architecture options, multi-agent work slices, acceptance evidence, and optional external agent lanes. Keep GPT-5.4 on the Codex main thread as the core developer and source of truth. Use external CLI lanes mainly for peripheral work such as testing, docs, verification, and review to save tokens. Prefer temp-path task callbacks for delegated Ollama lanes, and only write final user-facing test archives to docs/reports."

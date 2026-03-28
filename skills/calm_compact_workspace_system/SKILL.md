@@ -26,6 +26,8 @@ It now also incorporates the "Intelligent Workspace" direction: editorial precis
 - when implementation guidance conflicts with typography taste, prefer platform-native font rendering and consistency
 - maintain one sensory language across desktop, mobile, and web; vary density and layout, not brand feeling
 - if editorial styling conflicts with usability in a dense workspace, preserve compactness and clarity first
+- for the `console.svc.plus`, `XWorkmate.svc.plus`, and `XStream VPN` family, vary density and geometry by host surface scale, not the underlying visual language
+- do not let a web compact cleanup accidentally erase an existing shipping app brand accent unless the user explicitly asks for a rebrand
 
 ## Creative North Star
 
@@ -134,14 +136,42 @@ It now also incorporates the "Intelligent Workspace" direction: editorial precis
 - live monitoring metrics: 24px to 30px with tighter tracking and short line-height
 - avoid introducing display text larger than 30px in product workspaces
 
-### Default Compact Workspace Profile
+### Family Baseline Profile
 
+- reference host: `XWorkmate.svc.plus`
+- use this as the default baseline for the current Cloud-Neutral family unless the host is an explicitly denser web control plane
 - theme token name: `simple`
 - section title: `13 / 14 / 600`
 - compact body: `13 / 15 / 400`
 - body medium: `13 / 15 / 400`
 - emphasized body and button label: `13 / 14 / 600`
 - page outer spacing: `0`
+- standard section gap: `8`
+- compact gap: `6`
+- card radius: `16`
+- input radius: `14`
+- button radius: `12`
+- dialog radius: `18`
+- chip radius: `12`
+- sidebar radius: `20`
+- icon button radius: `12`
+- input height: `40`
+- desktop button height: `30`
+- mobile button height: `36`
+- toolbar height: `40`
+- prefer tonal separation first, then ghost borders, then explicit borders
+- preserve soft native touch geometry while keeping typography, spacing, and chrome semantics compact
+- use the same token family across desktop, mobile, and web; adapt geometry by surface scale, not by inventing a new visual language
+
+### Web Compact Derived Profile
+
+- profile name: `simple-web-compact`
+- reference host: `console.svc.plus`
+- use this for shared web consoles, dense control planes, admin utilities, and browser-based workspaces that need tighter geometry than the family baseline
+- section title: `13 / 14 / 600`
+- compact body: `13 / 15 / 400`
+- body medium: `13 / 15 / 400`
+- emphasized body and button label: `13 / 14 / 600`
 - standard section gap: `8`
 - compact gap: `6`
 - card radius: `6`
@@ -151,10 +181,26 @@ It now also incorporates the "Intelligent Workspace" direction: editorial precis
 - chip radius: `8`
 - input height: `36`
 - desktop button height: keep visual chrome at `28` to `32`; avoid 40px utility buttons in dense workspaces
-- prefer tonal separation first, then ghost borders, then explicit borders
-- in dense utility chrome, border-separated surfaces are allowed, but they should stay soft and low-contrast
-- avoid full-pill nav by default in desktop utility workspaces
-- use the same token family across desktop, mobile, and web; adapt spacing and radius by surface scale, not by inventing a new visual language
+- keep the same palette, border contrast, hierarchy, and chrome language as the family baseline; only geometry and density tighten
+
+## Product Family Calibration
+
+- `XWorkmate.svc.plus` is the current family baseline for geometry, typography cadence, and overall native shell feel
+- `console.svc.plus` is the denser web-derived profile built from the same family palette and hierarchy
+- `XStream VPN` already matches much of the family color semantics and calm utility tone, but may retain its established indigo / purple brand accent
+
+### XWorkmate Guidance
+
+- baseline token values: treat the current shipped implementation as the default family reference with `13 / 14 / 600` section titles, `13 / 15 / 400` body, `8 / 6` spacing, `card 16`, `button 12`, `input 14`, `dialog 18`, and a larger sidebar radius
+- implementation rule: when editing existing XWorkmate app shells, preserve the current shipped geometry unless the user explicitly asks for a tighter compact conversion
+- compact derivative rule: when building a denser shared console or browser workspace from XWorkmate patterns, tighten geometry only after preserving palette, typography, spacing cadence, and chrome semantics
+
+### XStream Brand Accent Retention
+
+- preserve XStream's established indigo / purple primary brand when working on shipping desktop or mobile app shells, onboarding, store-facing visuals, screenshots, and any product area already anchored to current brand assets
+- do not replace the XStream primary brand accent just to make it match `XWorkmate.svc.plus` or `console.svc.plus` if that change would create inconsistency with icons, release materials, or existing in-app identity
+- still normalize XStream surfaces, text hierarchy, spacing, border softness, warning banners, and utility semantics to this calm compact family
+- utility blue remains appropriate for secondary metrics, download-oriented readouts, shared admin surfaces, and cross-product console tooling where the XStream primary brand is not the main identity signal
 
 ## Color System
 
@@ -230,6 +276,7 @@ It now also incorporates the "Intelligent Workspace" direction: editorial precis
 - prefer semantic tokens over decorative palette picks
 - app chrome should be driven by `surface`, `surfaceAlt`, and `border`
 - primary actions use brand; live traffic metrics may use download/upload accents
+- when a host product already ships a stable primary brand accent, preserve it and move the rest of the UI toward the family palette instead of forcing a cross-product rebrand
 - success, warning, and error are status semantics, not general decoration colors
 - keep contrast compatible with desktop utility UI; avoid neon accents and glossy gradients by default
 - never use pure white as the universal page canvas; reserve it for the lowest container tier
@@ -314,10 +361,16 @@ It now also incorporates the "Intelligent Workspace" direction: editorial precis
 
 ### Radius System
 
-- 5px: dialogs and tightly packed modal shells
-- 6px: cards and utility panels
-- 8px: inputs, buttons, nav chips, compact controls
-- 12px to 16px: large monitoring cards and emphasized panels only
+- family baseline:
+  - 12px: buttons, icon wells, chips
+  - 14px: inputs
+  - 16px: cards and utility panels
+  - 18px: dialogs and floating shells
+- web compact derivative:
+  - 5px: dialogs and tightly packed modal shells
+  - 6px: cards and utility panels
+  - 8px: inputs, buttons, nav chips, compact controls
+- use the tighter web profile only for explicit dense web workspaces; do not force native shells down to `6px` to `8px` without an explicit product decision
 - full-pill radius is opt-in, not default
 
 ### Icon System
@@ -406,7 +459,10 @@ This skill is designed for AI-reconfigurable interfaces. The control layer shoul
 - Keep workspace headers compact
 - Maintain consistent typography and spacing across desktop and mobile
 - When in doubt, remove decoration before adding more
-- when adapting to web, preserve the same palette, radius logic, and hierarchy rules instead of introducing a separate website aesthetic
+- when adapting to web, preserve the same palette and hierarchy rules from the XWorkmate family baseline instead of introducing a separate website aesthetic
+- for `console.svc.plus`, start from the XWorkmate family baseline and then tighten geometry to the web compact derived profile
+- for existing `XWorkmate.svc.plus` app shells, preserve the current shipped geometry by default
+- for `XStream VPN`, preserve the existing primary brand accent unless the task is explicitly a rebrand or a new shared console surface
 - for desktop, bias toward denser spacing and quieter chrome
 - for mobile, keep the same materials and tokens but allow larger radii and slightly softer spacing
 - for product sites or showcase pages, the editorial layer may expand, but the core palette and tonal logic should still match the app surfaces

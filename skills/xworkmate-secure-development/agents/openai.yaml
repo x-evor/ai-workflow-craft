@@ -1,4 +1,0 @@
-interface:
-  display_name: "XWorkmate Secure Dev"
-  short_description: "Secure development and coding rules for XWorkmate."
-  default_prompt: "Use $xworkmate-secure-development to review this XWorkmate change for secure development and secure coding compliance."
